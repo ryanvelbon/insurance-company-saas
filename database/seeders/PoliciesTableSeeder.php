@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Insurer;
 use App\Models\SalesChannel;
 use App\Models\Policy;
+use App\Models\InsuranceType;
 
 use App\Helpers\MyMath;
 
@@ -54,6 +55,7 @@ class PoliciesTableSeeder extends Seeder
 
             Policy::create([
                 'policy_no' => rand(1000000, 9999999), // *PENDING* each insurer should have its own format
+                'insurance_type_id' => InsuranceType::inRandomOrder()->first()->id,
                 // 'status' => ,
                 'inception_date' => $inceptionDate,
                 'expiration_date' => $expirationDate ,

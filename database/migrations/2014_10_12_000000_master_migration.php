@@ -5,6 +5,8 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Config;
 
+use App\Models\Claim;
+
 class MasterMigration extends Migration
 {
     public function up()
@@ -27,6 +29,20 @@ class MasterMigration extends Migration
         Schema::create('industries', function (Blueprint $table) {
           $table->id();
           $table->string('title', 50);
+        });
+
+        Schema::create('insurance_types', function (Blueprint $table) {
+            $table->id();
+            $table->string('title', 60)->unique();
+        });
+
+        Schema::create('perils', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('insurance_type_id');
+            $table->string('title', 120);
+
+            $table->unique(['insurance_type_id', 'title']);
+            $table->foreign('insurance_type_id')->references('id')->on('insurance_types');
         });
 
         // Users-------------------------------------------------------------------
@@ -145,8 +161,8 @@ class MasterMigration extends Migration
 
         Schema::create('policies', function (Blueprint $table) {
             $table->id();
-            // $table->unsignedBigInteger('insurance_type_id');
             $table->string('policy_no', 20);
+            $table->unsignedBigInteger('insurance_type_id');
             // $table->unsignedTinyInteger('status');
             $table->date('inception_date');
             $table->date('expiration_date');
@@ -163,14 +179,34 @@ class MasterMigration extends Migration
             $table->timestamps();
 
             $table->unique(['policy_no', 'insurer_id']);
-            // $table->foreign('insurance_type_id')->references('id')->on('insurance_types');
+            $table->foreign('insurance_type_id')->references('id')->on('insurance_types');
             // $table->foreign('territory_id')->references('id')->on('countries');
             $table->foreign('insurer_id')->references('id')->on('insurers');
             $table->foreign('policyholder_id')->references('id')->on('persons');
             $table->foreign('sales_channel_id')->references('id')->on('sales_channels');
         });
 
-        // Schema::create('', function (Blueprint $table) {});
+
+        Schema::create('claims', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('policy_id');
+            $table->unsignedBigInteger('claimant_id');
+            $table->unsignedBigInteger('damaged_party_id')->nullable();
+            $table->tinyInteger('status')->default(Claim::STATUS_FILED);
+            $table->date('loss_date');
+            $table->date('reporting_date');
+            $table->unsignedBigInteger('peril_id');
+            $table->string('description', 5000);
+            $table->tinyInteger('filed_via');
+            $table->timestamps();
+
+            $table->foreign('policy_id')->references('id')->on('policies');
+            $table->foreign('claimant_id')->references('id')->on('persons');
+            $table->foreign('damaged_party_id')->references('id')->on('persons');
+            $table->foreign('peril_id')->references('id')->on('perils');
+        });
+
+
         // Schema::create('', function (Blueprint $table) {});
         // Schema::create('', function (Blueprint $table) {});
         // Schema::create('', function (Blueprint $table) {});
@@ -178,6 +214,7 @@ class MasterMigration extends Migration
 
     public function down()
     {
+        Schema::dropIfExists('claims');
         Schema::dropIfExists('policies');
         Schema::dropIfExists('persons_juridical');
         Schema::dropIfExists('persons_natural');
@@ -186,7 +223,9 @@ class MasterMigration extends Migration
         Schema::dropIfExists('employees');
         Schema::dropIfExists('insurers');
         Schema::dropIfExists('users');
+        Schema::dropIfExists('perils');
+        Schema::dropIfExists('insurance_types');
+        Schema::dropIfExists('industries');
         Schema::dropIfExists('countries');
-        Schema::dropIfExists('industries');        
     }
 }

@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
 
         CountriesTableSeeder::class,
         IndustriesTableSeeder::class,
+        InsuranceTypesTableSeeder::class,
+        PerilsTableSeeder::class,
 
         InsurersTableSeeder::class,
         EmployeesTableSeeder::class,
@@ -24,7 +26,7 @@ class DatabaseSeeder extends Seeder
         // PersonsTableSeeder::class, // no need
         
         PoliciesTableSeeder::class,
-        // ClaimsTableSeeder::class,
+        ClaimsTableSeeder::class,
         // ClaimStagesTableSeeder::class
       ]);
     }
